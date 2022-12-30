@@ -1,4 +1,5 @@
 import 'dotenv/config';
+process.env.TZ = 'Europe/Paris';
 
 import * as _modules from './modules';
 import { config } from './utils/config';
