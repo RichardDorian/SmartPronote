@@ -1,6 +1,11 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { Account, config } from './utils/config';
-import { getGrades, getHomeworks, getSession } from './utils/pronote';
+import {
+  getAverages,
+  getGrades,
+  getHomeworks,
+  getSession,
+} from './utils/pronote';
 
 const app = express();
 
@@ -9,8 +14,6 @@ function auth(request: Request, response: Response, next: NextFunction) {
   const password = request.header('X-Password');
 
   if (!username || !password) return response.sendStatus(401);
-
-  console.log(config);
 
   const account = config.accounts.find((a) => a.username === username);
   if (!account || password !== account.password)
@@ -30,6 +33,7 @@ app.get('/pronote', auth, async (request, response) => {
   const session = await getSession(account);
 
   response.status(200).send({
+    averages: await getAverages(account.username, session),
     grades: await getGrades(account.username, session),
     homeworks: await getHomeworks(account.username, session),
   });

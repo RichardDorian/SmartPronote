@@ -6,9 +6,7 @@ import { config } from './utils/config';
 import { loadDb } from './utils/database';
 import { getSession } from './utils/pronote';
 
-if (process.env.PROD === 'true') {
-  console.log('Production mode enabled');
-}
+if (process.env.PROD === 'true') console.log('Production mode enabled');
 
 import './server';
 

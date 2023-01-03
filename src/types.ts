@@ -4,6 +4,7 @@ export interface Homework {
   due: Date;
   content: string;
   files: { name?: string; url: string }[];
+  done: boolean;
   id: string;
 }
 
@@ -28,6 +29,11 @@ export interface Lesson {
   room: string;
   absent?: boolean;
   cancelled?: boolean;
+}
+
+export interface Averages {
+  value: number;
+  everyone: number;
 }
 
 export type Homeworks = Homework[];

@@ -21,7 +21,7 @@ export function getUser(username: string): Database[0] {
   const user = db[username];
 
   return (
-    user || {
+    user ?? {
       grades: [],
       homework: [],
       timetable: '',

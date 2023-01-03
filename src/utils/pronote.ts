@@ -1,5 +1,5 @@
 import { login, PronoteStudentSession } from 'pronote-api-maintained';
-import { Grades, Homeworks, Timetable } from '../types';
+import { Averages, Grades, Homeworks, Timetable } from '../types';
 import { Account, config } from './config';
 import { SubjectNames } from './locale';
 
@@ -8,6 +8,7 @@ const caches = {
   grades: new Map<string, Grades>(),
   timetable: new Map<string, Timetable>(),
   homeworks: new Map<string, Homeworks>(),
+  averages: new Map<string, Averages>(),
 };
 
 // Deleting cache entry 30 seconds before refresh
@@ -57,10 +58,10 @@ export async function getGrades(
   const cached = caches.grades.get(username);
   if (cached) return cached;
 
-  const raw = await session.marks();
+  const raw = await session.marks().catch(() => null);
   const grades: Grades = [];
 
-  for (const subject of raw.subjects) {
+  for (const subject of raw?.subjects ?? []) {
     for (const mark of subject.marks) {
       grades.push({
         subject: SubjectNames[subject.name] ?? subject.name,
@@ -77,8 +78,11 @@ export async function getGrades(
     }
   }
 
-  caches.grades.set(username, grades);
-  setTimeout(() => caches.grades.delete(username), cacheTtl);
+  if (raw) {
+    // Don't add to cache if request went wrong
+    caches.grades.set(username, grades);
+    setTimeout(() => caches.grades.delete(username), cacheTtl);
+  }
 
   return grades;
 }
@@ -97,19 +101,24 @@ export async function getTimetable(
     currentMonday.getTime() + 5 * 24 * 3600 * 1000
   );
 
-  const raw = await session.timetable(currentMonday, currentFriday);
-  const timetable: Timetable = raw.map((v) => ({
-    from: v.from,
-    room: v.room,
-    subject: SubjectNames[v.subject] ?? v.subject,
-    teacher: v.teacher,
-    to: v.to,
-    absent: v.isAway,
-    cancelled: v.isCancelled,
-  }));
+  const raw = await session
+    .timetable(currentMonday, currentFriday)
+    .catch(() => null);
+  const timetable: Timetable =
+    raw?.map((v) => ({
+      from: v.from,
+      room: v.room,
+      subject: SubjectNames[v.subject] ?? v.subject,
+      teacher: v.teacher,
+      to: v.to,
+      absent: v.isAway,
+      cancelled: v.isCancelled,
+    })) ?? [];
 
-  caches.timetable.set(username, timetable);
-  setTimeout(() => caches.timetable.delete(username), cacheTtl);
+  if (raw) {
+    caches.timetable.set(username, timetable);
+    setTimeout(() => caches.timetable.delete(username), cacheTtl);
+  }
 
   return timetable;
 }
@@ -126,19 +135,47 @@ export async function getHomeworks(
     // 150 days in the future
     currentMonday.getTime() + 150 * 24 * 3600 * 1000
   );
-  const raw = await session.homeworks(currentMonday, farAwayInTime);
+  const raw = await session
+    .homeworks(currentMonday, farAwayInTime)
+    .catch(() => null);
 
-  const homeworks: Homeworks = raw.map((v) => ({
-    content: v.description,
-    due: v.for,
-    files: v.files.map((f) => ({ name: f.name, url: f.url })),
-    givenAt: v.givenAt,
-    subject: SubjectNames[v.subject] ?? v.subject,
-    id: v.id,
-  }));
+  const homeworks: Homeworks =
+    raw?.map((v) => ({
+      content: v.description,
+      due: v.for,
+      files: v.files.map((f) => ({ name: f.name, url: f.url })),
+      givenAt: v.givenAt,
+      subject: SubjectNames[v.subject] ?? v.subject,
+      done: v.done,
+      id: v.id,
+    })) ?? [];
 
-  caches.homeworks.set(username, homeworks);
-  setTimeout(() => caches.homeworks.delete(username), cacheTtl);
+  if (raw) {
+    caches.homeworks.set(username, homeworks);
+    setTimeout(() => caches.homeworks.delete(username), cacheTtl);
+  }
 
   return homeworks;
+}
+
+export async function getAverages(
+  username: string,
+  session: PronoteStudentSession
+): Promise<Averages> {
+  const cached = caches.averages.get(username);
+  if (cached) return cached;
+
+  const raw = await session.marks().catch(() => null);
+
+  const averages: Averages = {
+    value: raw?.averages?.student ?? 0,
+    everyone: raw?.averages?.studentClass ?? 0,
+  };
+
+  if (raw) {
+    caches.averages.set(username, averages);
+    setTimeout(() => caches.averages.delete(username), cacheTtl);
+  }
+
+  return averages;
 }
