@@ -142,7 +142,7 @@ export async function getHomeworks(
   const homeworks: Homeworks =
     raw?.map((v) => ({
       content: v.description,
-      due: v.for,
+      due: new Date(v.for.getTime() + 3 * 60 * 60 * 1000), // We add 3 hours because a homework is always for the day before its due at 11PM
       files: v.files.map((f) => ({ name: f.name, url: f.url })),
       givenAt: v.givenAt,
       subject: SubjectNames[v.subject] ?? v.subject,
