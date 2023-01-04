@@ -130,13 +130,13 @@ export async function getHomeworks(
   const cached = caches.homeworks.get(username);
   if (cached) return cached;
 
-  const currentMonday = getCurrentMonday();
+  const today = new Date();
   const farAwayInTime = new Date(
     // 150 days in the future
-    currentMonday.getTime() + 150 * 24 * 3600 * 1000
+    today.getTime() + 150 * 24 * 3600 * 1000
   );
   const raw = await session
-    .homeworks(currentMonday, farAwayInTime)
+    .homeworks(today, farAwayInTime)
     .catch(() => null);
 
   const homeworks: Homeworks =
