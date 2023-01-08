@@ -1,5 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
+import { join } from 'path';
 import { Account, config } from './utils/config';
+import { getUser, setUser } from './utils/database';
+import { getEmail, getTokens } from './utils/google';
 import {
   getAverages,
   getGrades,
@@ -38,6 +41,29 @@ app.get('/pronote', auth, async (request, response) => {
     homeworks: await getHomeworks(account.username, session),
   });
 });
+
+app.get(
+  '/google',
+  async (request: Request<{}, {}, {}, { code: string }>, response) => {
+    const tokens = await getTokens(request.query.code);
+
+    // @ts-ignore
+    const email: string = (await getEmail(tokens.refresh_token)).data.email;
+
+    const account = config.accounts.find((a) => a.google?.email === email);
+
+    if (account) {
+      const dbUser = getUser(account.username);
+      dbUser.google.refreshToken = tokens.refresh_token;
+      dbUser.google.pending = false;
+      await setUser(account.username, dbUser);
+    }
+
+    response.sendFile(
+      join(__dirname, '..', 'public', 'googleLoginSucess.html')
+    );
+  }
+);
 
 const port = parseInt(process.env.PORT ?? '5566');
 app.listen(port, () => console.log(`Server running on port ${port}`));

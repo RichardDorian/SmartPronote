@@ -5,6 +5,10 @@ const dbPath = join(__dirname, '..', '..', 'db.json');
 
 interface Database {
   [user: string]: {
+    google: {
+      refreshToken?: string;
+      pending: boolean;
+    };
     grades: string[];
     homework: string[];
     timetable: string;
@@ -22,6 +26,9 @@ export function getUser(username: string): Database[0] {
 
   return (
     user ?? {
+      google: {
+        pending: false,
+      },
       grades: [],
       homework: [],
       timetable: '',

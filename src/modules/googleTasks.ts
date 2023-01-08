@@ -1,8 +1,8 @@
-import { google } from 'googleapis';
 import { createHash } from 'node:crypto';
 import { PronoteStudentSession } from 'pronote-api-maintained';
 import { Account } from '../utils/config';
 import { getUser, setUser } from '../utils/database';
+import { getGoogleAPI } from '../utils/google';
 import { SubjectNames } from '../utils/locale';
 import { getHomeworks } from '../utils/pronote';
 
@@ -14,15 +14,8 @@ export async function googleTasks(
 
   const dbUser = getUser(account.username);
 
-  const oAuth2Client = new google.auth.OAuth2({
-    clientId: process.env.GOOGLE_API_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_API_CLIENT_SECRET,
-  });
-  oAuth2Client.setCredentials({
-    refresh_token: account.modules.googleTasks.refreshToken,
-  });
-
-  const tasks = google.tasks({ version: 'v1', auth: oAuth2Client });
+  const tasks = await getGoogleAPI(account, 'tasks', { version: 'v1' });
+  if (!tasks) return;
 
   for (const homework of homeworks) {
     const hash = createHash('md5')

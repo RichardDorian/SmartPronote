@@ -1,8 +1,8 @@
-import { google } from 'googleapis';
 import { createHash } from 'node:crypto';
 import { PronoteStudentSession } from 'pronote-api-maintained';
 import { Account } from '../utils/config';
 import { getUser, setUser } from '../utils/database';
+import { getGoogleAPI } from '../utils/google';
 import { GCalendarColors } from '../utils/locale';
 import { getTimetable } from '../utils/pronote';
 
@@ -20,15 +20,10 @@ export async function googleCalendar(
   const dbUser = getUser(account.username);
   if (timetableHash === dbUser.timetable) return;
 
-  const oAuth2Client = new google.auth.OAuth2({
-    clientId: process.env.GOOGLE_API_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_API_CLIENT_SECRET,
+  const calendar = await getGoogleAPI(account, 'calendar', {
+    version: 'v3',
   });
-  oAuth2Client.setCredentials({
-    refresh_token: account.modules.googleCalendar.refreshToken,
-  });
-
-  const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+  if (!calendar) return;
 
   // Clear last week + current week
   const weekMs = 7 * 24 * 3600 * 1000;

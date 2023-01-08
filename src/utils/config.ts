@@ -19,13 +19,14 @@ export interface Config {
     username: string;
     password: string;
     cas: string;
+    google?: {
+      email: `${string}@${string}.${string}`;
+    };
     modules: {
       googleCalendar?: {
-        refreshToken: string;
         calendarId?: string;
       };
       googleTasks?: {
-        refreshToken: string;
         taskListId: string;
       };
       iftttGrades?: {
