@@ -7,7 +7,7 @@ import sendNotification from './ifttt';
 const oAuth2Client = new google.auth.OAuth2({
   clientId: process.env.GOOGLE_API_CLIENT_ID,
   clientSecret: process.env.GOOGLE_API_CLIENT_SECRET,
-  redirectUri: 'http://localhost:5566/google',
+  redirectUri: process.env.GOOGLE_REDIRECT_URI,
 });
 
 const SCOPES = [
