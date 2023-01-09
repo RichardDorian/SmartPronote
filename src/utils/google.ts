@@ -26,7 +26,7 @@ export async function askForLogin(account: Account) {
     access_type: 'offline',
     scope: SCOPES,
     redirect_uri: process.env.GOOGLE_REDIRECT_URI,
-    prompt: 'select_account',
+    prompt: 'select_account consent',
   });
 
   const dbUser = getUser(account.username);
