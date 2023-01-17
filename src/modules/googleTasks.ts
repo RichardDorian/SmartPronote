@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { PronoteStudentSession } from 'pronote-api-maintained';
 import { Account } from '../utils/config';
 import { getUser, setUser } from '../utils/database';
@@ -18,11 +17,8 @@ export async function googleTasks(
   if (!tasks) return;
 
   for (const homework of homeworks) {
-    const hash = createHash('md5')
-      .update(homework.content + homework.subject + homework.due.toString())
-      .digest('hex');
-    if (dbUser.homework.includes(hash)) continue;
-    dbUser.homework.push(hash);
+    if (dbUser.homework.includes(homework.hash)) continue;
+    dbUser.homework.push(homework.hash);
 
     await tasks.tasks.insert({
       tasklist: account.modules.googleTasks.taskListId,

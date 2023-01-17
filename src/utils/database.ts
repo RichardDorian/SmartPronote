@@ -38,5 +38,5 @@ export function getUser(username: string): Database[0] {
 
 export async function setUser(user: string, data: Database[0]) {
   db[user] = data;
-  await writeFile(dbPath, JSON.stringify(db));
+  await writeFile(dbPath, JSON.stringify(db, null, 2));
 }

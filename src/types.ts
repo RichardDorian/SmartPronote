@@ -5,7 +5,7 @@ export interface Homework {
   content: string;
   files: { name?: string; url: string }[];
   done: boolean;
-  id: string;
+  hash: string;
 }
 
 export interface Grade {
@@ -18,7 +18,7 @@ export interface Grade {
   best: number;
   date: Date;
   comment: string;
-  id: string;
+  hash: string;
 }
 
 export interface Lesson {

@@ -14,15 +14,15 @@ export async function iftttGrades(
   const dbUser = getUser(account.username);
 
   for (const grade of grades) {
-    if (dbUser.grades.includes(grade.id)) continue;
+    if (dbUser.grades.includes(grade.hash)) continue;
 
-    sendNotification(
+    await sendNotification(
       key,
       `You got ${grade.value}/${grade.scale} in ${grade.subject}. The class average is ${grade.average}`,
       account.url
     );
 
-    dbUser.grades.push(grade.id);
+    dbUser.grades.push(grade.hash);
   }
 
   await setUser(account.username, dbUser);

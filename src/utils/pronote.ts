@@ -1,6 +1,7 @@
 import { login, PronoteStudentSession } from 'pronote-api-maintained';
 import { Averages, Grades, Homeworks, Timetable } from '../types';
 import { Account, config } from './config';
+import { hashGrade, hashHomework } from './hashing';
 import { SubjectNames } from './locale';
 
 const caches = {
@@ -63,7 +64,7 @@ export async function getGrades(
 
   for (const subject of raw?.subjects ?? []) {
     for (const mark of subject.marks) {
-      grades.push({
+      const grade = {
         subject: SubjectNames[subject.name] ?? subject.name,
         average: mark.average,
         coefficient: mark.coefficient,
@@ -73,8 +74,9 @@ export async function getGrades(
         worst: mark.min,
         scale: mark.scale,
         value: mark.value,
-        id: mark.id,
-      });
+      };
+
+      grades.push({ ...grade, hash: hashGrade(grade) });
     }
   }
 
@@ -141,15 +143,18 @@ export async function getHomeworks(
     .catch(() => null);
 
   const homeworks: Homeworks =
-    raw?.map((v) => ({
-      content: v.description,
-      due: new Date(v.for.getTime() + 3 * 60 * 60 * 1000), // We add 3 hours because a homework is always for the day before its due at 11PM
-      files: v.files.map((f) => ({ name: f.name, url: f.url })),
-      givenAt: v.givenAt,
-      subject: SubjectNames[v.subject] ?? v.subject,
-      done: v.done,
-      id: v.id,
-    })) ?? [];
+    raw?.map((v) => {
+      const homework = {
+        content: v.description,
+        due: new Date(v.for.getTime() + 3 * 60 * 60 * 1000), // We add 3 hours because a homework is always for the day before its due at 11PM
+        files: v.files.map((f) => ({ name: f.name, url: f.url })),
+        givenAt: v.givenAt,
+        subject: SubjectNames[v.subject] ?? v.subject,
+        done: v.done,
+      };
+
+      return { ...homework, hash: hashHomework(homework) };
+    }) ?? [];
 
   if (raw) {
     caches.homeworks.set(username, homeworks);
