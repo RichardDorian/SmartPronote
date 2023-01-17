@@ -19,6 +19,13 @@ let db: Database = {};
 
 export async function loadDb() {
   db = JSON.parse(await readFile(dbPath, 'utf8'));
+
+  // Reseting the google pending state on every restart
+  for (const user of Object.keys(db)) {
+    const account = db[user];
+    if (account.google?.pending === true) account.google.pending = false;
+    await setUser(user, account);
+  }
 }
 
 export function getUser(username: string): Database[0] {
