@@ -28,4 +28,10 @@ Here are a few examples of the premade modules:
 
   Sends a push notification to your phone using the IFTTT service everytime you get a new notification.
 
+  **Android**
+  
 <img src="https://user-images.githubusercontent.com/75615715/211205945-d02f5014-9d58-4438-b018-9a6ef427344a.png" height="500px">
+  
+  **WearOS**
+  
+<img src="https://user-images.githubusercontent.com/75615715/212977694-1e8eb866-fc92-40f2-aaa1-0b711f329394.png" height="150px">
