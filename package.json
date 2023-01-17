@@ -12,6 +12,9 @@
     "url": "git+https://github.com/RichardDorian/SmartPronote.git"
   },
   "keywords": [
+    "notifications",
+    "automation",
+    "calendar",
     "pronote"
   ],
   "author": "RichardDorian",
