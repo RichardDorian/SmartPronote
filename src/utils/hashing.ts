@@ -15,10 +15,10 @@ export function hashGrade(grade: Omit<Grade, 'hash'>) {
       // is published but it's the same grade. However
       // if the student's grade changes it'll be considered
       // as a brand new grade.
-      grade.value.toString() +
-        grade.scale.toString() +
+      grade.value?.toString() +
+        grade.scale?.toString() +
         grade.subject +
-        grade.coefficient.toString() +
+        grade.coefficient?.toString() +
         grade.comment
     )
     .digest('hex');
